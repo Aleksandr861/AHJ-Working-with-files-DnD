@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -23,9 +23,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22.14.0
-          cache: 'yarn' # Меняется кеш на 'yarn'
-      - run: yarn install # Меняется npm install на yarn install
-      - run: yarn run lint # Меняется npm run lint на yarn run lint
+          cache: 'yarn'
+      - run: yarn install
+      - run: yarn run lint
 
   test:
     runs-on: ubuntu-latest
@@ -35,15 +35,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22.14.0
-          cache: 'yarn' # Меняется кеш на 'yarn'
-      - run: yarn install # Меняется npm install на yarn install
+          cache: 'yarn'
+      - run: yarn install
       
   build:
     needs: [eslint]
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
 
     runs-on: ubuntu-latest
 
@@ -52,15 +48,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22.14.0
-          cache: 'yarn' # Меняется кеш на 'yarn'
-      - run: yarn install # Меняется npm install на yarn install
-      - run: yarn run build # Меняется npm run build на yarn run build
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: 'dist'
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          cache: 'yarn'
+      - run: yarn install
+      - run: yarn run build
+      - name: Deploy to gh-pages branch
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add dist
+          git commit -m "Deploy to GitHub Pages"
+          git push origin +HEAD:refs/heads/gh-pages

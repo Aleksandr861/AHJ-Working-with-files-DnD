@@ -2,7 +2,6 @@ name: AHJ-Working with files, DnD
 
 on:
   push:
-
   workflow_dispatch:
 
 permissions:
@@ -17,49 +16,44 @@ concurrency:
 jobs:
   eslint:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22.14.0
-          cache: 'yarn' # Меняется кеш на 'yarn'
-      - run: yarn install # Меняется npm install на yarn install
-      - run: yarn run lint # Меняется npm run lint на yarn run lint
+          cache: 'yarn'
+      - run: yarn install
+      - run: yarn run lint
 
   test:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22.14.0
-          cache: 'yarn' # Меняется кеш на 'yarn'
-      - run: yarn install # Меняется npm install на yarn install
-      
+          cache: 'yarn'
+      - run: yarn install
+
   build:
     needs: [eslint]
-
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-    with:
-      node-version: 22.14.0
-      cache: 'yarn'
-  - run: yarn install
-  - run: yarn run build
-  - name: Deploy to GitHub Pages
-    uses: peaceiris/actions-gh-pages@v3
-    with:
-      github_token: ${{ secrets.GITHUB_TOKEN }}
-      publish_dir: dist
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.14.0
+          cache: 'yarn'
+      - run: yarn install
+      - run: yarn run build
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: dist
     # steps:
     #   - uses: actions/checkout@v4
     #   - uses: actions/setup-node@v4

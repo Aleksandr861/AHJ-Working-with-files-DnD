@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -23,9 +23,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22.14.0
-          cache: 'yarn'
-      - run: yarn install
-      - run: yarn run lint
+          cache: 'yarn' # Меняется кеш на 'yarn'
+      - run: yarn install # Меняется npm install на yarn install
+      - run: yarn run lint # Меняется npm run lint на yarn run lint
 
   test:
     runs-on: ubuntu-latest
@@ -35,39 +35,45 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22.14.0
-          cache: 'yarn'
-      - run: yarn install
+          cache: 'yarn' # Меняется кеш на 'yarn'
+      - run: yarn install # Меняется npm install на yarn install
       
   build:
     needs: [eslint]
 
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22.14.0
-          cache: 'yarn'
-      - run: yarn install
-      - run: yarn run build
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: build
-          path: dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: build
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+    with:
+      node-version: 22.14.0
+      cache: 'yarn'
+  - run: yarn install
+  - run: yarn run build
+  - name: Deploy to GitHub Pages
+    uses: peaceiris/actions-gh-pages@v3
+    with:
+      github_token: ${{ secrets.GITHUB_TOKEN }}
+      publish_dir: dist
+    # steps:
+    #   - uses: actions/checkout@v4
+    #   - uses: actions/setup-node@v4
+    #     with:
+    #       node-version: 22.14.0
+    #       cache: 'yarn' # Меняется кеш на 'yarn'
+    #   - run: yarn install # Меняется npm install на yarn install
+    #   - run: yarn run build # Меняется npm run build на yarn run build
+    #   - name: Setup Pages
+    #     uses: actions/configure-pages@v4
+    #   - name: Upload artifact
+    #     uses: actions/upload-pages-artifact@v3
+    #     with:
+    #       path: 'dist'
+    #   - name: Deploy to GitHub Pages
+    #     id: deployment
+    #     uses: actions/deploy-pages@v4
